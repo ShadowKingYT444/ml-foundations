@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Cross-Entropy Method — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>The Cross-Entropy Method</h1>
+</header>
+
+<div class="kicker">Day 23 · Oct 23, 2026</div>
+<h1 style="margin-top:6px">The Cross-Entropy Method</h1>
+<p class="meta">Reuven Rubinstein (1997) · <a href="https://en.wikipedia.org/wiki/Cross-entropy_method">reference</a> · Optimization</p>
+<p><span class="badge rel3">relevant</span></p>
+<p><span class="badge">modern adaptation: distribution-based harness design search</span></p>
+<div class="card"><h2>One line</h2>
+<p>CEM keeps a parametric distribution over candidate designs, samples from it, keeps the elite samples, and refits the distribution to those elites — iterating until the distribution concentrates on good designs.</p>
+<h2>The problem</h2>
+<p>Black-box optimization with no gradients and discrete choices: random search wastes samples on dead regions, while greedy hill-climbing gets stuck. The question is how to use the <em>history</em> of evaluated candidates to focus future sampling without assuming differentiability — which is exactly the situation in harness design, where the choices (which tools, which decomposition, which prompts) are discrete and the objective is only observable by running the agent.</p>
+<h2>How it works</h2>
+<p>Initialize parameters <code>θ₀</code> of a distribution family (e.g., mean and covariance of a Gaussian, or per-choice probabilities of a categorical). Then repeat: <strong>sample</strong> <code>N</code> candidates <code>xᵢ ~ p_θ</code>; <strong>score</strong> each with the black-box objective <code>f(xᵢ)</code>; <strong>select</strong> the top <code>ρ</code>-fraction as elites; <strong>refit</strong> <code>θ ← argmax_θ Σ_elites log p_θ(xᵢ)</code>, i.e., maximum-likelihood on the elites. The refit step minimizes the cross-entropy between <code>p_θ</code> and the empirical elite distribution — hence the name. Intuition: repeatedly ask &quot;what do the winners look like?&quot; and become more like them. Variance shrinkage is often added to force convergence. Over iterations the distribution collapses onto a high-performing region.</p>
+<h2>Key results</h2>
+<p>Introduced by Rubinstein (1997) for rare-event simulation, then generalized to optimization; it became a standard derivative-free optimizer for continuous control and planning. A prominent modern use: PETS (Chua et al., 2018) uses CEM inside model-predictive control to plan action sequences with learned dynamics models. Convergence results exist under smoothness assumptions, though in practice the method is valued for simplicity and robustness rather than tight theory.</p>
+<h2>How it maps to modern harness work</h2>
+<p>Distribution-based harness design search is CEM with harnesses as the samples: maintain a distribution over harness <em>patterns</em> (which components to include, which tools to expose, what budget each gets), sample concrete harnesses, evaluate them on tasks, keep the winners, and refit the distribution toward them. The <strong>elite-refit loop</strong> is the mechanism for &quot;iteratively concentrating search around winning harness patterns&quot;: early rounds explore broadly, later rounds tighten around architectures that pass the gates. This is the natural alternative to gradient-style prompt optimization (TextGrad) when the search space is discrete structure rather than continuous text. The analogs are direct: samples = candidate harness variants, the objective <code>f</code> = task success rate minus cost, and the refit distribution = a learned prior over good harness structure. PluginRSI&#x27;s bandit over its 75-plugin library is spiritually adjacent — keep what works, drop what doesn&#x27;t — but a full CEM would additionally <em>refit a generative model</em> of good configurations instead of just tracking per-arm means.</p>
+<h2>Limits and open questions</h2>
+<p>The parametric family may not contain any good design — CEM can only concentrate, not invent outside its family (model bias). It is sample-hungry in high dimensions, and a harness has many discrete choices; elites can also collapse diversity prematurely, converging to a local optimum while a better architecture sits one mutation away. The open question is representational: what parametric family is expressive enough for <em>program-like</em> harness structures yet sample-efficient enough to refit from a few dozen expensive evaluations? Mixture models over component libraries are one direction; learned generative priors over code are another, essentially untested at this scale.</p></div>
+<div class="nav"><span><a href="simulated-annealing.html">← Day 22: Simulated Annealing</a></span><span><a href="../index.html">All concepts</a></span><span><a href="variational-inference.html">Day 24: Variational Inference →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

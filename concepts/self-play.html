@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self-Play — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>Self-Play</h1>
+</header>
+
+<div class="kicker">Day 21 · Oct 21, 2026</div>
+<h1 style="margin-top:6px">Self-Play</h1>
+<p class="meta">Samuel 1959; AlphaGo/AlphaZero 2016–2017 · <a href="https://en.wikipedia.org/wiki/Self-play_(reinforcement_learning_technique)">reference</a> · Reinforcement Learning</p>
+<p><span class="badge rel3">relevant</span></p>
+<p><span class="badge">modern adaptation: SafeCoEvo-style co-evolution</span></p>
+<div class="card"><h2>One line</h2>
+<p>Self-play trains an agent by playing it against copies of itself, so each improvement in the agent automatically creates a stronger opponent — the training curriculum generates itself.</p>
+<h2>The problem</h2>
+<p>Learning from a fixed opponent or a fixed dataset caps out: once you beat the training distribution, there is nothing left to learn from. Hand-designing a curriculum of progressively harder opponents is labor-intensive and biased by the designer&#x27;s imagination. The question was whether the <em>adversary itself</em> could be the curriculum — improving in lockstep with the learner, forever.</p>
+<h2>How it works</h2>
+<p>Two (or more) copies of the same agent compete. After each training iteration, the new version plays the previous best; if it wins, it becomes the new champion. Because the opponent is always &quot;yourself from recently,&quot; the difficulty tracks your skill automatically — this is the <strong>co-evolutionary arms race</strong>. It became famous with <strong>AlphaGo</strong> (Silver et al., <em>Nature</em>, 2016), which used self-play to refine its policy network, and <strong>AlphaZero</strong> (Silver et al., 2017), which learned chess, shogi, and Go <em>entirely</em> from self-play with no human games, reaching superhuman level in hours. The dynamics are a form of fictitious play: each generation best-responds to the previous meta, and in well-behaved games this converges toward equilibrium strategies. But it can also fail: <strong>cycles</strong> (A beats B beats C beats A, rock-paper-scissors dynamics where the &quot;champion&quot; is arbitrary), and <strong>forgetting</strong> (the new champion loses to strategies the old one handled — it overfit to beating its immediate predecessor). The fixes are population methods: AlphaStar (Vinyals et al., <em>Nature</em>, 2019) used <em>league training</em> — a population of agents with different roles (main agents, exploiters that hunt weaknesses) — to preserve diversity and prevent cycles.</p>
+<h2>Key results</h2>
+<p>The idea dates to Arthur Samuel&#x27;s checkers program (1959). AlphaGo&#x27;s 2016 victory over Lee Sedol was the first superhuman self-play milestone; AlphaZero (2017) showed the method needs <em>zero</em> human data; AlphaStar&#x27;s league training (2019) showed that naive two-player self-play collapses without population diversity. Together they established the pattern: self-play generates its own curriculum, but only a <em>diverse</em> self-play ecosystem is stable.</p>
+<h2>How it maps to modern harness work</h2>
+<p><strong>SafeCoEvo</strong> (arXiv 2609.36580) is self-play with the two players being harness components: a fast-updating <em>safety harness</em> and a slower fine-tuned <em>Guard</em> co-evolve against each other. The analogs: the safety harness plays the role of the <em>exploiter</em> — it keeps finding new ways tasks go unsafe, generating an automatic curriculum of harder safety cases; the Guard is the <em>main agent</em>, learning to handle everything the harness throws at it. Each improvement on one side raises the bar for the other, exactly the arms-race dynamic. What changed: the &quot;game&quot; is cooperative-adversarial (both sides want a safe, capable agent) rather than zero-sum, and the two sides update on <em>different timescales</em> (fast explicit harness edits, slow Guard fine-tuning) — the two-timescale trick is what keeps the race stable instead of oscillating. The failure modes transfer directly: if the safety harness only generates one <em>kind</em> of attack, the Guard overfits to it (forgetting); if the two sides chase each other in circles, capability and safety metrics oscillate without converging (cycles). That is why SafeCoEvo&#x27;s reported numbers — 10.05% fewer unsafe outcomes <em>and</em> 12.15% higher task success — matter: they show the arms race converged rather than cycled.</p>
+<h2>Limits and open questions</h2>
+<p>Self-play theory leans on game-theoretic structure (zero-sum, transitive skill) that harness co-evolution does not have — there is no theorem saying a safety-harness/Guard race converges. Diversity is the known stabilizer, but &quot;diverse&quot; is easy to say and hard to measure for harness populations: is a second safety harness diverse if it finds different <em>failure modes</em> or just different <em>phrasings</em>? Open questions: how to detect cycling in co-evolving harness metrics (when is oscillation a problem vs. healthy exploration?); whether exploiters should be <em>rewarded</em> for finding Guard weaknesses (a third population, AlphaStar-style); and what the right timescale separation is — too fast and the Guard cannot keep up, too slow and the curriculum stalls.</p></div>
+<div class="nav"><span><a href="online-learning-regret.html">← Day 20: Online Learning &amp; Regret Minimization</a></span><span><a href="../index.html">All concepts</a></span><span><a href="simulated-annealing.html">Day 22: Simulated Annealing →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

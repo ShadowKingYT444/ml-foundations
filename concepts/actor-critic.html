@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Actor-Critic Methods — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>Actor-Critic Methods</h1>
+</header>
+
+<div class="kicker">Day 5 · Oct 05, 2026</div>
+<h1 style="margin-top:6px">Actor-Critic Methods</h1>
+<p class="meta">Barto, Sutton &amp; Anderson, 1983 · <a href="https://en.wikipedia.org/wiki/Actor%E2%80%93critic_method">reference</a> · Reinforcement Learning</p>
+<p><span class="badge rel4">highly relevant</span></p>
+<p><span class="badge">modern adaptation: proposer-critic harness revision loops</span></p>
+<div class="card"><h2>One line</h2>
+<p>Actor-critic methods split learning into two roles: an <em>actor</em> that proposes actions and a <em>critic</em> that estimates how good states are, so the actor can learn from low-variance value estimates instead of noisy full returns.</p>
+<h2>The problem</h2>
+<p>REINFORCE&#x27;s gradient uses the total return of a whole trajectory, which is unbiased but extremely noisy — one lucky or unlucky rollout swings the update. Waiting for full episodes also delays learning. The question was whether you could get a learning signal <em>mid-trajectory</em> that is less noisy than Monte Carlo returns, without waiting for the episode to end.</p>
+<h2>How it works</h2>
+<p>The <strong>actor</strong> is a parameterized policy <code>πθ(a|s)</code> that selects actions. The <strong>critic</strong> learns a value function <code>Vw(s)</code> estimating expected future return from a state. The key object is the <strong>temporal-difference error</strong>:</p>
+<p><code>δt = rt + γ Vw(st+1) − Vw(st)</code></p>
+<p>which measures how much better reality turned out than the critic predicted. The actor updates with <code>∇θ log πθ(at|st) · δt</code> — it reinforces actions that <em>surprised the critic upward</em>. Because <code>δt</code> is computed from a single transition plus the critic&#x27;s estimate, it has far lower variance than a full-trajectory return. This is <strong>bootstrapping</strong>: the critic updates from its own predictions rather than waiting for ground truth, trading some bias (early critics are wrong) for much faster, lower-variance learning. Barto, Sutton and Anderson&#x27;s 1983 &quot;neuronlike adaptive elements&quot; paper introduced the two-element architecture; the modern A2C/A3C family (Mnih et al., 2016) scaled it with parallel workers and entropy regularization.</p>
+<h2>Key results</h2>
+<p>The 1983 paper showed an actor-critic could solve difficult control tasks (a simulated pole-balancer and related problems) with function approximation. The policy gradient theorem (Sutton et al., 2000) put the method on rigorous footing by proving the actor&#x27;s update direction is a true gradient when the critic matches the policy&#x27;s value function. A3C (2016) demonstrated that asynchronous actor-critic agents could beat prior state of the art across Atari games with dramatically less wall-clock time, cementing the pattern that <em>a learned evaluator beats raw returns for steering a proposer</em>.</p>
+<h2>How it maps to modern harness work</h2>
+<p>Nearly every modern harness-revision loop is an actor-critic in disguise. The <strong>actor</strong> is the proposer LLM: SelfSearch&#x27;s <em>improver</em> that edits the agent&#x27;s repository, GEPA&#x27;s candidate generator, or any loop that drafts a new harness version. The <strong>critic</strong> is whatever judges the proposal — a second LLM-as-judge, a benchmark score, or a value estimate of &quot;how good is this harness state.&quot; The critic&#x27;s value estimate corresponds to the <em>expected future task performance of the current harness</em>, and the TD-error analog is <em>measured improvement minus expected improvement</em>: proposals that beat the critic&#x27;s expectation get reinforced. Why bootstrapping helps here: evaluating a harness fully (running every benchmark) is expensive, exactly like waiting for episode end — a critic that can judge a <em>partial</em> signal (a few probe tasks, a static review) gives cheap, low-variance steering. The known failure mode carries over too: if the critic is miscalibrated (a judge that likes verbose harnesses, a benchmark that leaks), the actor optimizes the critic&#x27;s bias instead of real performance — the harness equivalent of reward hacking.</p>
+<h2>Limits and open questions</h2>
+<p>Classical actor-critic theory needs the critic to be <em>compatible</em> with the actor (Sutton et al.&#x27;s compatible-function-approximation condition); LLM judges satisfy nothing like that, so the &quot;gradient&quot; modern loops follow is heuristic, not a true gradient. Bootstrapping compounds critic error over revisions — a slightly wrong judge steers ten generations off a cliff. Open questions: can we learn critics that are calibrated enough for multi-generation harness evolution; how to combine expensive ground-truth evaluations with cheap judge estimates (a principled schedule, not vibes); and whether the actor and critic should share a model (as in Video-RSI&#x27;s Solver/Editor split) or be kept separate to avoid collapse.</p></div>
+<div class="nav"><span><a href="credit-assignment.html">← Day 4: The Credit Assignment Problem</a></span><span><a href="../index.html">All concepts</a></span><span><a href="bayesian-optimization.html">Day 6: Bayesian Optimization →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

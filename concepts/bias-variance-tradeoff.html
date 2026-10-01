@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Bias-Variance Tradeoff — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>The Bias-Variance Tradeoff</h1>
+</header>
+
+<div class="kicker">Day 17 · Oct 17, 2026</div>
+<h1 style="margin-top:6px">The Bias-Variance Tradeoff</h1>
+<p class="meta">Geman, Bienenstock &amp; Doursat, 1992 (&#x27;Neural networks and the bias/variance dilemma&#x27;) · <a href="https://en.wikipedia.org/wiki/Bias%E2%80%93variance_tradeoff">reference</a> · Statistics</p>
+<p><span class="badge rel4">highly relevant</span></p>
+<p><span class="badge">modern adaptation: split/fuse decisions in adaptive decomposition</span></p>
+<div class="card"><h2>One line</h2>
+<p>Expected prediction error decomposes into three parts — bias (how wrong your model&#x27;s average answer is), variance (how much it flinches with different data), and irreducible noise — and shrinking one usually grows the other.</p>
+<h2>The problem</h2>
+<p>Early neural-network work was puzzling: bigger models fit training data beautifully and then collapsed on new data, while small models were stable but mediocre everywhere. People lacked a language for <em>why</em> adding capacity helps one failure mode and hurts another. The bias–variance decomposition gives it: for squared error, expected error over random training sets equals</p>
+<p>    E[error] = bias² + variance + irreducible noise</p>
+<p>where <strong>bias²</strong> = (average prediction − truth)² measures systematic error from a too-rigid model, <strong>variance</strong> = E[(prediction − average prediction)²] measures sensitivity to the particular data sampled, and the noise term is baked into the problem and no model can remove.</p>
+<h2>How it works</h2>
+<p>Picture fitting a curve through noisy points. A straight-line fit has high bias (it can&#x27;t bend) but low variance (two different datasets give nearly the same line). A high-degree polynomial fit has low bias (it can wiggle to the truth) but high variance (two datasets give wildly different wiggles). The textbook U-curve: as model complexity rises, bias falls and variance rises, and total error is minimized at the sweet spot in the middle. Regularization, early stopping, bagging (variance reduction), and ensembles all make sense as tools that move you along this curve.</p>
+<h2>Key results</h2>
+<ul>
+<li><strong>Geman et al. (1992):</strong> the formal decomposition for neural networks, linking it to statistical estimation theory.</li>
+<li><strong>Breiman (1996):</strong> bagging provably reduces variance without much bias cost — the mechanism behind random forests.</li>
+<li><strong>Belkin et al. (2019):</strong> the <em>double-descent</em> curve showed the classic U can turn back down past the interpolation point in overparameterized models — the tradeoff is real but the classical picture is incomplete for modern deep learning.</li>
+</ul>
+<h2>How it maps to modern harness work</h2>
+<p>This is the missing vocabulary for <strong>split/fuse</strong> decisions in adaptive decomposition. Consider a harness component that handles, say, file I/O. As one monolithic component it has <em>high bias</em> (one design must serve every sub-case: CSV parsing, error retries, large files) but <em>low variance</em> (it was evolved against the whole task set, lots of data). Split it into three specialized subcomponents and each gets <em>lower bias</em> (each can specialize) but <em>higher variance</em> (each is now tuned on a third of the failure data — a lucky or unlucky sample can make it brittle). Fusing does the reverse: you pool data and share evidence (variance down) but force one design to cover heterogeneous cases (bias up). So the split/fuse question is literally a bias–variance question: split when a component&#x27;s error looks <em>systematic</em> (fails the same way on many inputs → bias), fuse when error looks <em>brittle</em> (works except on a few sampled cases → variance). The classic diagnostics transfer too: error on many tasks but consistent patterns → split; error only on rare tasks → maybe don&#x27;t touch it.</p>
+<h2>Limits and open questions</h2>
+<p>The clean decomposition holds for squared error with a fixed model class and i.i.d. data — none of which an evolving harness has. Harness &quot;error&quot; isn&#x27;t a clean scalar; a component&#x27;s failure is entangled with upstream and downstream components (a correct component fed garbage fails), so component-level bias/variance is confounded by system composition. Also, in harness search we rarely have <em>enough</em> failure cases per component for variance estimates to be meaningful — the analog of &quot;more data&quot; (run more tasks) is expensive in LLM-evaluation dollars. A genuinely useful version would need a notion of per-component error attribution first, which circles back to the credit assignment problem.</p></div>
+<div class="nav"><span><a href="successive-halving.html">← Day 16: Successive Halving &amp; Hyperband</a></span><span><a href="../index.html">All concepts</a></span><span><a href="causal-inference.html">Day 18: Causal Inference &amp; Counterfactuals →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Policy Gradients (REINFORCE) — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>Policy Gradients (REINFORCE)</h1>
+</header>
+
+<div class="kicker">Day 14 · Oct 14, 2026</div>
+<h1 style="margin-top:6px">Policy Gradients (REINFORCE)</h1>
+<p class="meta">Ronald J. Williams, 1992 · <a href="https://en.wikipedia.org/wiki/Policy_gradient">reference</a> · Reinforcement Learning</p>
+<p><span class="badge rel4">highly relevant</span></p>
+<p><span class="badge">modern adaptation: RLHarness / agentic RL</span></p>
+<div class="card"><h2>One line</h2>
+<p>Policy gradients optimize a parameterized policy directly by following the gradient of expected reward, using the log-derivative trick to turn a non-differentiable sampling objective into a usable gradient estimate.</p>
+<h2>The problem</h2>
+<p>Before 1992, reinforcement learning mostly meant learning <em>value functions</em> — estimate how good each state is, then act greedily. That works for small discrete action spaces, but it breaks down when actions are continuous, structured, or when the policy needs to be stochastic (games, robotics, any partial observability). Worse, you often cannot differentiate through the environment at all: the reward is a black-box signal (win/lose, task success), and the trajectory distribution depends on the policy itself. The question was how to get a gradient through a sampler you cannot differentiate.</p>
+<h2>How it works</h2>
+<p>REINFORCE&#x27;s trick is the <strong>log-derivative identity</strong>: since ∇π = π ∇ log π, the gradient of expected return J(θ) = E_τ∼πθ[R(τ)] can be written without ever differentiating the environment:</p>
+<p><code>∇θ J(θ) = E_τ∼πθ[ R(τ) · Σt ∇θ log πθ(at | st) ]</code></p>
+<p>Intuition: run the policy, collect full trajectories, and nudge each action&#x27;s log-probability up in proportion to the total reward that followed. Actions that preceded high reward get reinforced; actions that preceded failure get suppressed. The update is Monte Carlo — it needs only sampled trajectories and the final return, so it works for <em>any</em> reward function, differentiable or not. The price is <strong>variance</strong>: the estimator multiplies a high-variance total return by a gradient, so learning is noisy. The fix is a <strong>baseline</strong>: subtract any quantity <code>b</code> that is independent of the actions taken — <code>E[b · ∇θ log π] = 0</code>, so the estimate stays unbiased — and a good baseline (e.g., average return, or a state-dependent value) can cut variance dramatically.</p>
+<h2>Key results</h2>
+<p>Williams&#x27; 1992 paper (&quot;Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning&quot;, <em>Machine Learning</em> 8:229–256) established REINFORCE as the canonical unbiased gradient estimator for stochastic policies. The policy gradient theorem (2000) made the theory clean and spawned actor-critic methods. REINFORCE with baselines remained the workhorse behind landmark empirical wins — from early neural game players to the RL stage of modern LLM training (RLHF pipelines are, at their core, policy-gradient updates on non-differentiable human-preference rewards).</p>
+<h2>How it maps to modern harness work</h2>
+<p>Agentic RL — e.g. <strong>RLHarness</strong>-style systems that fine-tune an agent&#x27;s policy or its harness parameters against task success — is REINFORCE lifted into the harness setting. The analogs: the <strong>policy</strong> is the agent&#x27;s decision process (or the harness&#x27;s routing logic); the <strong>trajectory</strong> is a full multi-step rollout with tool calls; the <strong>return</strong> is a 0/1 task-success signal, exactly the non-differentiable black-box reward REINFORCE was built for. What changed: the &quot;actions&quot; are natural-language tool calls and the horizon is long, so the variance problem Williams flagged becomes extreme — success is sparse and credit must propagate across dozens of steps. That is why modern systems rediscover baselines: per-task difficulty normalization, group-relative scoring (compare rollouts of the <em>same</em> task, as in GRPO-style objectives), and learned reward models are all baseline machinery doing variance reduction. If you want to adapt foundational ideas to harness engineering, the first question is always the REINFORCE question: <em>what is your unbiased gradient signal, and what baseline are you subtracting?</em></p>
+<h2>Limits and open questions</h2>
+<p>REINFORCE is unbiased but can be so noisy it is practically unusable without a strong baseline — and in harness settings, a good state-dependent baseline is hard to learn because the &quot;state&quot; is a whole conversation history. The theory also assumes a stationary environment, while a harness that is itself being edited makes the environment non-stationary (the policy&#x27;s past data goes stale). Open questions: how to do credit assignment across long tool-use trajectories without drowning in variance; whether language-model critics can serve as low-variance surrogate returns without injecting their own bias; and how often to refresh the policy when the harness underneath it keeps changing.</p></div>
+<div class="nav"><span><a href="pac-learning.html">← Day 13: PAC Learning &amp; Generalization Bounds</a></span><span><a href="../index.html">All concepts</a></span><span><a href="population-based-training.html">Day 15: Population-Based Training →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multi-Objective Optimization &amp; Pareto Fronts — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>Multi-Objective Optimization &amp; Pareto Fronts</h1>
+</header>
+
+<div class="kicker">Day 12 · Oct 12, 2026</div>
+<h1 style="margin-top:6px">Multi-Objective Optimization &amp; Pareto Fronts</h1>
+<p class="meta">Vilfredo Pareto (1906); NSGA-II by Deb et al. (2002) · <a href="https://en.wikipedia.org/wiki/Multi-objective_optimization">reference</a> · Optimization</p>
+<p><span class="badge rel4">highly relevant</span></p>
+<p><span class="badge">modern adaptation: MoMHa</span></p>
+<div class="card"><h2>One line</h2>
+<p>When objectives conflict — accuracy versus cost versus safety — no single optimum exists; the right object of study is the Pareto front of non-dominated solutions.</p>
+<h2>The problem</h2>
+<p>Single-metric optimization (&quot;maximize accuracy&quot;) produces harnesses that are unsafe or unaffordable, and the damage is invisible to the metric. The common patch, scalarization (<code>0.7·accuracy − 0.3·cost</code>), hides the trade-off inside arbitrary weights — and worse, a weighted sum can <em>never</em> reach the non-convex regions of the trade-off surface, no matter what weights you pick. The question is how to search honestly when the answer is a set of trade-offs, not a point.</p>
+<h2>How it works</h2>
+<p>Solution <code>x</code> <strong>dominates</strong> <code>y</code> if it is at least as good on every objective and strictly better on at least one. The <strong>Pareto front</strong> is the set of non-dominated solutions: nobody on the front can be improved on one objective without sacrificing another. True multi-objective algorithms return the whole front so a decision-maker picks the trade-off afterward. NSGA-II (Deb et al., 2002) does this with fast non-dominated sorting plus a crowding-distance term that keeps the front diverse instead of collapsing to one region. Front quality is measured by the hypervolume indicator (Zitzler, 1999): the volume of objective space dominated by the front.</p>
+<h2>Key results</h2>
+<p>Pareto formalized the concept in his 1906 <em>Manuale</em>; the modern computational field grew from evolutionary multi-objective work in the 1990s. NSGA-II (Deb, Pratap, Agarwal &amp; Meyarivan, <em>IEEE Transactions on Evolutionary Computation</em>, 2002) became the reference algorithm — one of the most cited papers in optimization — because elitism plus diversity maintenance made Pareto search practical. The enduring lesson: when objectives genuinely conflict, <em>the front is the answer</em>, and any single number is a political choice disguised as a technical one.</p>
+<h2>How it maps to modern harness work</h2>
+<p>MoMHa (2609.30967) is the first harness optimizer to treat accuracy, safety, and token cost as <em>joint</em> first-class objectives — the direct MOO move against single-objective harness search (GEPA and TextGrad variants that optimize one metric). Its novelty is exactly the Pareto framing: instead of &quot;best accuracy at any cost,&quot; it returns harnesses along the accuracy–safety–cost front, so you can see what a point of accuracy costs in dollars and in risk. Pareto dominance is the right selection operator for harness evolution in general: a harness that is safer <em>and</em> cheaper <em>and</em> more accurate dominates, full stop; anything else is a trade-off choice, not an objective fact. Single-metric harness evaluation is misleading precisely because it collapses the front to one point — usually the expensive, brittle corner — and then declares victory.</p>
+<h2>Limits and open questions</h2>
+<p>MOO is sample-hungry: estimating a front needs many more evaluations than optimizing one scalar, and each harness evaluation costs real inference dollars. NSGA-II-style algorithms were designed for cheap function evaluations; in harness land that assumption is badly false. There is also the curse of dimensionality of objectives: with many objectives, almost everything is non-dominated (&quot;dominance resistance&quot;) and selection pressure vanishes. The open questions are practical: can we estimate the front from few rollouts, e.g., by predicting all objectives from shared trajectory features instead of measuring each? And which objectives even belong in the front — is &quot;maintainability of the harness&quot; or &quot;robustness to tool-API drift&quot; a fourth objective nobody currently measures? Until those are on the front, optimizers will keep sacrificing them silently.</p></div>
+<div class="nav"><span><a href="monte-carlo-tree-search.html">← Day 11: Monte Carlo Tree Search</a></span><span><a href="../index.html">All concepts</a></span><span><a href="pac-learning.html">Day 13: PAC Learning &amp; Generalization Bounds →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

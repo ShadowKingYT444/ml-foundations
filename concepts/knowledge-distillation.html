@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knowledge Distillation — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>Knowledge Distillation</h1>
+</header>
+
+<div class="kicker">Day 9 · Oct 09, 2026</div>
+<h1 style="margin-top:6px">Knowledge Distillation</h1>
+<p class="meta">Hinton, Vinyals &amp; Dean (2015) · <a href="https://en.wikipedia.org/wiki/Knowledge_distillation">reference</a> · Statistics</p>
+<p><span class="badge rel4">highly relevant</span></p>
+<p><span class="badge">modern adaptation: distilling repair skills into reusable plugins</span></p>
+<div class="card"><h2>One line</h2>
+<p>A large teacher model&#x27;s softened output distribution trains a smaller student to match it, transferring &quot;dark knowledge&quot; about class similarities that one-hot labels throw away.</p>
+<h2>The problem</h2>
+<p>Big models are expensive to deploy, but training small models from scratch on hard labels underperforms badly. The teacher&#x27;s full output distribution carries information the labels don&#x27;t: a &quot;5% cat, 90% dog&quot; output says cats are more similar to dogs than to cars. The question was how to make that implicit knowledge trainable — and the same question arises in harness work, where an expensive successful <em>process</em> (a full debugging session, a costly search) needs to become a cheap reusable <em>component</em>.</p>
+<h2>How it works</h2>
+<p>Given teacher logits <code>zᵢ</code>, soften with temperature <code>T</code>: <code>pᵢ = exp(zᵢ/T) / Σⱼ exp(zⱼ/T)</code>. Higher <code>T</code> spreads probability mass, exposing the teacher&#x27;s beliefs about similarity structure. The student minimizes <code>L = α·CE(student_T, teacher_T) + (1−α)·CE(student, hard labels)</code> — matching soft targets plus the ground truth. Hinton et al. (2015) showed a distilled shallow network approaching deep-network performance on MNIST, and the idea scaled to production model compression (e.g., DistilBERT, 2019). Variants distill intermediate features, attention maps, and even self-distill within one architecture.</p>
+<h2>Key results</h2>
+<p>&quot;Distilling the Knowledge in a Neural Network&quot; (Hinton, Vinyals &amp; Dean, arXiv 2015) launched model compression as a mainstream practice. It reframed the goal: the student isn&#x27;t learning the <em>data</em>, it&#x27;s learning the teacher&#x27;s <em>function</em>, including the teacher&#x27;s uncertainty. The temperature parameter turned out to be the key dial — too low and the student gets one-hot-like targets and learns nothing extra; too high and everything is uniform noise.</p>
+<h2>How it maps to modern harness work</h2>
+<p>The harness analog is <strong>compiling knowledge into executable form</strong>. AgentBug-Smith distills repair skills from mined real-world bug fixes so agents fix harness bugs faster; PluginRSI&#x27;s 75-plugin library is distilled reusable behavior, each plugin a chunk of &quot;dark knowledge&quot; compiled from many successful trajectories into an executable unit. The mapping: the teacher is the expensive full process (a frontier model&#x27;s repair trace, a full search episode); the soft targets are the detailed statistics of <em>how</em> it succeeded (which fixes worked on which bug classes); the student is the small reusable component that behaves correctly on its covered cases. The temperature analog is how much of the teacher&#x27;s nuance — edge cases, rare failure modes — survives compilation. Just as low-temperature distillation loses information, compressing a rich repair trajectory into a plugin loses context, which is exactly why distilled skills are narrow specialists rather than generalists.</p>
+<h2>Limits and open questions</h2>
+<p>Distillation transfers behavior, not understanding: the student inherits the teacher&#x27;s biases and blind spots, and can be <em>confidently wrong</em> where the teacher was merely uncertain. In harness land, a distilled plugin is frozen at the knowledge available when it was made — if the environment or tool APIs shift, the plugin silently goes stale, and no amount of matching old soft targets will fix it. The open question is versioning: how do distilled components get <em>updated</em> when the teacher process would now do something different? That staleness problem is the same one adaptive decomposition attacks by keeping structure live (split/fuse) instead of frozen. A promising direction is distillation with a refresh loop — re-distilling from fresh teacher traces on a schedule — but nobody has characterized how often that loop must run to stay ahead of drift.</p></div>
+<div class="nav"><span><a href="expectation-maximization.html">← Day 8: Expectation-Maximization</a></span><span><a href="../index.html">All concepts</a></span><span><a href="meta-learning.html">Day 10: Meta-Learning (MAML) →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

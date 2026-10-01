@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Curriculum Learning — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>Curriculum Learning</h1>
+</header>
+
+<div class="kicker">Day 19 · Oct 19, 2026</div>
+<h1 style="margin-top:6px">Curriculum Learning</h1>
+<p class="meta">Bengio, Louradour, Collobert &amp; Weston (2009) · <a href="https://en.wikipedia.org/wiki/Curriculum_learning">reference</a> · Learning Theory</p>
+<p><span class="badge rel3">relevant</span></p>
+<p><span class="badge">modern adaptation: ordering tasks for harness evolution</span></p>
+<div class="card"><h2>One line</h2>
+<p>Train on easy examples first and gradually increase difficulty, so the learner builds on mastered skills instead of drowning in hard cases from the start.</p>
+<h2>The problem</h2>
+<p>Training on the full hard distribution from scratch can stall in bad local minima or take far longer than necessary; human education strongly suggests ordering matters. But in machine learning the &quot;right&quot; order isn&#x27;t obvious, and a wrong order can be worse than none. The same dilemma faces harness evolution: evolving a harness directly on hard multi-step tasks yields mostly total failures — zero informative gradient — while easy tasks give cheap, high-signal feedback.</p>
+<h2>How it works</h2>
+<p>Define a difficulty measure (or have a teacher order examples), then sample from a distribution that starts concentrated on easy examples and anneals toward the full data distribution (Bengio et al., 2009). Later formalized as self-paced learning (Kumar et al., 2010), where the learner itself selects low-loss examples. The mechanism is a continuation method: early easy examples place parameters in a good basin of attraction, and later hard examples fine-tune without escaping it. Intuition: solve a smoothed version of the problem first, then sharpen. The difficulty measure is the load-bearing part of the whole idea — everything downstream depends on it being right.</p>
+<h2>Key results</h2>
+<p>&quot;Curriculum learning&quot; (Bengio et al., ICML 2009) showed faster convergence and better generalization on toy vision and language tasks with hand-designed curricula. The replication history since has been mixed: benefits are real when the difficulty measure aligns with the learning dynamics, and absent or negative when it doesn&#x27;t. Several studies have found <em>anti-curricula</em> (hard examples first) winning on some tasks, which sharpened the field&#x27;s understanding that a curriculum is a bias, not a free lunch.</p>
+<h2>How it maps to modern harness work</h2>
+<p>A harness optimizer that evolves first on simple tasks (short, single-tool, unambiguous success criteria) and escalates to hard ones (multi-step, adversarial, long-horizon) is running a curriculum: early tasks provide cheap, high-signal structure learning, and later tasks stress-test it. Self-evolving agents that bootstrap in easy environments before hard ones do this implicitly. The analog of &quot;easy examples&quot; is <em>tasks where the current harness already earns partial credit</em>, so evolution sees informative failures (which component broke) rather than total noise. This also explains a failure mode seen in practice: evolving directly on the hardest benchmark tasks produces flat zero scores and the optimizer learns nothing — the harness-space version of drowning.</p>
+<h2>Limits and open questions</h2>
+<p>A curriculum is a bias, and a wrong one actively hurts: if easy tasks teach the wrong structure, the optimizer converges to a harness that is locally excellent and globally wrong — and then &quot;hard&quot; tasks just look like noise. In harness evolution, &quot;easy&quot; is hard to define without already knowing the solution, and easy-for-the-model may not be easy-for-the-harness-structure. The open question is who defines difficulty: a static designer curriculum risks misalignment with what the evolving harness actually needs next, while a self-paced (agent-chosen) curriculum risks gaming — the agent picking tasks that make it look good. This is the same credit-assignment tension at the heart of adaptive decomposition: local &quot;progress&quot; can be globally misleading, and any curriculum is only as good as its progress metric.</p></div>
+<div class="nav"><span><a href="causal-inference.html">← Day 18: Causal Inference &amp; Counterfactuals</a></span><span><a href="../index.html">All concepts</a></span><span><a href="online-learning-regret.html">Day 20: Online Learning &amp; Regret Minimization →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

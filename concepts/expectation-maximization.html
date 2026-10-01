@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Expectation-Maximization — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>Expectation-Maximization</h1>
+</header>
+
+<div class="kicker">Day 8 · Oct 08, 2026</div>
+<h1 style="margin-top:6px">Expectation-Maximization</h1>
+<p class="meta">Dempster, Laird &amp; Rubin 1977 · <a href="https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization">reference</a> · Statistics</p>
+<p><span class="badge rel4">highly relevant</span></p>
+<p><span class="badge">modern adaptation: VACE-style alternating co-evolution</span></p>
+<div class="card"><h2>One line</h2>
+<p>EM fits models with hidden variables by alternating between <em>guessing</em> the hidden structure given current parameters (E-step) and <em>improving</em> the parameters given those guesses (M-step), with a theorem guaranteeing the likelihood never goes down.</p>
+<h2>The problem</h2>
+<p>Maximum-likelihood estimation breaks when some variables are unobserved: you can&#x27;t maximize <code>log p(x | θ)</code> if the observed data <code>x</code> depends on latents <code>z</code> you never see. Naive approaches — ignoring the latents, or jointly optimizing <code>θ</code> and <code>z</code> at once — get stuck or overfit, because the two quantities <em>condition on each other</em>: the best parameters depend on the latent assignments, and the best latent assignments depend on the parameters. EM&#x27;s contribution was to turn this chicken-and-egg problem into a monotone coordinate ascent with a real guarantee.</p>
+<h2>How it works</h2>
+<p>The E-step computes the expected complete-data log-likelihood <code>Q(θ | θᵗ) = E_{z|x,θᵗ}[log p(x, z | θ)]</code> — i.e. it fills in the latents with a <em>distribution</em>, not a single guess, using the current parameters <code>θᵗ</code>. The M-step then sets <code>θᵗ⁺¹ = argmax_θ Q(θ | θᵗ)</code>. The elegant part is the proof: by Jensen&#x27;s inequality, the log-likelihood decomposes into <code>Q</code> plus a KL-divergence term that is minimized exactly when the E-step uses the true posterior — so maximizing <code>Q</code> guarantees <code>log p(x | θᵗ⁺¹) ≥ log p(x | θᵗ)</code>. Monotone ascent to a local optimum is assured. The classic worked example is a Gaussian mixture: the E-step computes soft cluster responsibilities for each point, the M-step recomputes each cluster&#x27;s mean/covariance as a weighted average.</p>
+<h2>Key results</h2>
+<p>The Dempster–Laird–Rubin (1977) paper proved the monotone-likelihood theorem and unified a zoo of earlier iterative algorithms (k-means, Baum–Welch for HMMs) as special cases. EM remains the canonical way to fit mixture models, HMMs, and topic models; variational EM extends it to intractable posteriors. Its main theoretical caveat is also famous: the guarantee is <em>local</em> — EM can and does converge to poor local optima depending on initialization.</p>
+<h2>How it maps to modern harness work</h2>
+<p>VACE (Validation-Gated Alternating Co-Evolution, 2026) adapts EM&#x27;s alternating structure to the problem of jointly improving an <em>agent model</em> and its <em>harness</em>. The mapping:</p>
+<ul>
+<li><strong>E-step analog</strong> → <em>harness revision</em>: given the current agent weights, analyze trajectories, diagnose which harness components (prompts, tools, workflow) are the bottleneck, and propose structural edits — this is &quot;estimating the hidden structure&quot; that makes the current parameters perform best.</li>
+<li><strong>M-step analog</strong> → <em>RL weight update</em>: given the revised harness, run agentic reinforcement learning to re-optimize the model weights — the &quot;maximization&quot; conditioned on the latent structure.</li>
+<li><strong>The EM guarantee</strong> → deliberately weakened: VACE only accepts a new harness after <em>checkpoint-specific validation</em>, i.e. it must beat the old harness when the current weights are plugged in. This is a pragmatic stand-in for EM&#x27;s monotone ascent.</li>
+</ul>
+<p>What changed: real EM&#x27;s guarantee rests on the E-step computing an exact posterior and the M-step solving a well-posed maximization. VACE&#x27;s &quot;E-step&quot; is an LLM writing harness code — approximate, stochastic, with no Jensen&#x27;s inequality to lean on — so the validation gate substitutes a <em>measured</em> improvement for a <em>proven</em> one.</p>
+<h2>Limits and open questions</h2>
+<p>When the &quot;M-step&quot; is an LLM edit rather than an argmax, nothing guarantees monotonicity; validation on a finite checkpoint can accept noise as signal. Worse, the two phases can chase each other&#x27;s tail: the harness adapts to the current weights&#x27; quirks, and the weights then adapt to the new harness&#x27;s quirks. Open questions: can we formalize a divergence measure for the harness-as-latent that restores some convergence statement? And how do you set the validation gate tight enough to prevent regressions without rejecting the risky-but-good structural changes — the classic gate benefit was 4.6–7.0pp, but that number itself is data-dependent.</p></div>
+<div class="nav"><span><a href="boosting.html">← Day 7: Boosting (AdaBoost / Gradient Boosting)</a></span><span><a href="../index.html">All concepts</a></span><span><a href="knowledge-distillation.html">Day 9: Knowledge Distillation →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

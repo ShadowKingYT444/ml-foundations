@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bayesian Optimization — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>Bayesian Optimization</h1>
+</header>
+
+<div class="kicker">Day 6 · Oct 06, 2026</div>
+<h1 style="margin-top:6px">Bayesian Optimization</h1>
+<p class="meta">Mockus 1970s; Jones, Schonlau &amp; Welch 1998 (EGO) · <a href="https://en.wikipedia.org/wiki/Bayesian_optimization">reference</a> · Optimization</p>
+<p><span class="badge rel4">highly relevant</span></p>
+<p><span class="badge">modern adaptation: surrogate-guided harness search (GEPA-style proposers)</span></p>
+<div class="card"><h2>One line</h2>
+<p>When evaluating the objective is expensive, fit a cheap probabilistic <em>surrogate</em> to past evaluations and use an <em>acquisition function</em> to decide where to sample next — balancing exploration of uncertain regions against exploitation of known-good ones.</p>
+<h2>The problem</h2>
+<p>Grid search and random search waste the budget on hopeless configurations when each evaluation costs hours (hyperparameter tuning, hardware design, A/B tests on live traffic). The classical question: how do you choose the <em>next</em> evaluation point using everything you&#x27;ve learned, when you can&#x27;t afford many? Bayesian optimization&#x27;s answer is to never touch the expensive function directly for decisions — instead maintain a model of <em>what you believe</em> about it, including uncertainty, and optimize that instead.</p>
+<h2>How it works</h2>
+<p>A Gaussian process (GP) prior is placed over the objective <code>f</code>: after observing <code>(xᵢ, f(xᵢ))</code>, the posterior gives a mean <code>μ(x)</code> and variance <code>σ²(x)</code> at every candidate point — a prediction <em>plus</em> calibrated uncertainty. An <em>acquisition function</em> then scores each candidate: Expected Improvement <code>EI(x) = E[max(f(x) − f_best, 0)]</code> rewards points likely to beat the incumbent, while Upper Confidence Bound <code>UCB(x) = μ(x) + βσ(x)</code> adds an explicit exploration bonus <code>βσ</code>. Maximize the acquisition function (cheap), evaluate the real function there (expensive), update the GP, repeat. The Jones–Schonlau–Welch (1998) &quot;Efficient Global Optimization&quot; paper made EI+GP the standard recipe; Srinivas et al. (2010) later proved sublinear regret bounds for GP-UCB under smoothness assumptions.</p>
+<h2>Key results</h2>
+<p>Landmark results: EGO (1998) brought BO into engineering practice; GP-UCB regret bounds (2010) gave the first rigorous explore-exploit guarantees; and BO became the backbone of hyperparameter tuning (Spearmint, 2012) and neural architecture search warm-ups. Empirically, BO routinely beats random search by an order of magnitude in sample efficiency on expensive black-box functions with dozens of dimensions — and fails gracefully beyond that, which is why scaling BO is its own research field.</p>
+<h2>How it maps to modern harness work</h2>
+<p>In harness optimization (e.g. GEPA-style proposers), the &quot;expensive evaluation&quot; is a full agent rollout on a benchmark suite, and the classical BO loop is adapted with LLMs filling both roles:</p>
+<ul>
+<li><strong>Surrogate</strong> → often an <em>LLM judge</em> or learned reward model that predicts a harness candidate&#x27;s quality without running it, or even just the proposer&#x27;s implicit prior over &quot;what good harnesses look like.&quot; Unlike a GP, it provides no calibrated <code>σ(x)</code> — uncertainty is vibes, not variance.</li>
+<li><strong>Acquisition function</strong> → the proposal strategy: generating candidates that are both promising (mutations of the current best) and diverse (exploring unexplored structural families). Some systems make this explicit by asking the LLM to propose candidates <em>different</em> from past failures.</li>
+<li><strong>Objective</strong> → task success rate / cost on the dev set; the incumbent is the best harness found so far.</li>
+</ul>
+<p>What changed: the surrogate went from a mathematically principled posterior to a language model&#x27;s gut feeling, and the search space went from a continuous box to <em>program space</em>. The discipline BO offers — <em>quantified</em> uncertainty driving <em>principled</em> exploration — is exactly what current LLM-driven search lacks, which is why some of the strongest recent systems reintroduce it (e.g. explicit coverage/vote rules deciding which data a branch &quot;owns&quot;).</p>
+<h2>Limits and open questions</h2>
+<p>GP surrogates assume smooth, low-dimensional objectives; harness space is discrete, high-dimensional, and violently non-smooth (one token can flip behavior). LLM-judge surrogates hallucinate confidence and correlate poorly with real rollout outcomes on out-of-distribution harness structures. Open questions: can we build a <em>calibrated</em> surrogate for program space — e.g. train a small model on (harness, score) pairs with proper uncertainty? And can acquisition functions be expressed in language (&quot;propose the candidate that maximizes information gain about the failure boundary&quot;) and actually honored by the proposer?</p></div>
+<div class="nav"><span><a href="actor-critic.html">← Day 5: Actor-Critic Methods</a></span><span><a href="../index.html">All concepts</a></span><span><a href="boosting.html">Day 7: Boosting (AdaBoost / Gradient Boosting) →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gradient Descent &amp; Backpropagation — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>Gradient Descent &amp; Backpropagation</h1>
+</header>
+
+<div class="kicker">Day 2 · Oct 02, 2026</div>
+<h1 style="margin-top:6px">Gradient Descent &amp; Backpropagation</h1>
+<p class="meta">Cauchy 1847; Rumelhart, Hinton &amp; Williams 1986 · <a href="https://en.wikipedia.org/wiki/Backpropagation">reference</a> · Optimization</p>
+<p><span class="badge rel5">core idea</span></p>
+<p><span class="badge">modern adaptation: TextGrad</span></p>
+<div class="card"><h2>One line</h2>
+<p>The gradient of a loss function points in the direction of steepest increase, so repeatedly stepping downhill — with derivatives computed efficiently by the chain rule — trains everything from 1980s neural nets to today&#x27;s giant models.</p>
+<h2>The problem</h2>
+<p>Before backprop, training a multi-layer network meant assigning &quot;credit&quot; for errors to hidden units nobody could observe: perturbing one weight at a time was hopelessly slow, and the perceptron learning rule (Rosenblatt 1958) only handled single layers. The question was whether deep architectures could be trained at all with finite compute. Werbos (1975) described the method in a thesis, but it was the 1986 Rumelhart–Hinton–Williams paper that showed it actually <em>worked</em> — networks discovering edge detectors and semantic structure from nothing but error signals.</p>
+<h2>How it works</h2>
+<p>Given a differentiable loss <code>L(θ)</code> over parameters <code>θ</code>, gradient descent updates <code>θ ← θ − η∇L(θ)</code> with step size <code>η</code> (the learning rate). If <code>L</code> is locally smooth, this is guaranteed to decrease the loss for small enough <code>η</code>. Backpropagation is the <em>algorithm</em> that computes <code>∇L</code> in time linear in the network size instead of quadratic: it applies the chain rule layer by layer, propagating an error signal backward from the output. For a layer <code>z = Wx</code>, <code>a = σ(z)</code>, the gradient flows as <code>δ = (W_nextᵀ δ_next) ⊙ σ′(z)</code>, and each weight&#x27;s gradient is just an outer product of the local error and the local input. The key insight is that <em>credit assignment is local</em>: every parameter only needs to know what its own output contributed, not the whole system.</p>
+<h2>Key results</h2>
+<p>Landmark guarantees: gradient descent converges to a stationary point on smooth non-convex functions, and at an <code>O(1/√T)</code> rate to the global optimum for convex Lipschitz losses — the rate behind every convex ML textbook bound. Empirical wins: backprop trained LeNet (LeCun 1989) for digit recognition and, decades later, made ImageNet-scale CNNs, seq2seq models, and transformers possible — the entire deep-learning era is gradient descent plus scale plus data.</p>
+<h2>How it maps to modern harness work</h2>
+<p>TextGrad (Yuksekgonul et al., 2024) lifts this whole machinery into a world with no differentiable weights. The computation graph is an LLM <em>system</em>: nodes are prompts, tool calls, and model invocations instead of layers. The analogy is exact and deliberate:</p>
+<ul>
+<li><strong>Loss</strong> → a task metric or an LLM-judge score on the system&#x27;s output.</li>
+<li><strong>Gradient</strong> → <em>natural-language critique</em> of why a node&#x27;s output was bad, i.e. &quot;textual gradients&quot; that point toward better behavior instead of a numeric direction.</li>
+<li><strong>Backprop (chain rule)</strong> → critique propagation: feedback on the final answer is rewritten into feedback for each upstream node, preserving &quot;which input caused which error.&quot;</li>
+<li><strong>Optimizer step</strong> → the LLM rewrites the node&#x27;s prompt, code, or tool definition to address the critique.</li>
+</ul>
+<p>So TextGrad keeps the <em>structure</em> of gradient descent (forward evaluation, backward credit assignment, local parameter update) while replacing every numeric quantity with language. The power of the mapping is that decades of optimizer wisdom — mini-batching, momentum, learning-rate discipline — can be ported by analogy into prompt/harness search.</p>
+<h2>Limits and open questions</h2>
+<p>Textual gradients have no magnitude, no direction guarantee, and no convergence theorem: an LLM critique can be wrong, and &quot;stepping&quot; by rewriting a prompt is a non-local jump, not an <code>η</code>-sized move. The chain rule&#x27;s locality breaks when a critique of a downstream node doesn&#x27;t cleanly factor through upstream nodes. Open questions: can we calibrate the <em>reliability</em> of textual gradients (e.g. self-consistency over critiques)? Is there a principled step-size analog — how aggressive should a rewrite be? And what, if anything, plays the role of second-order information for prompt optimization?</p></div>
+<div class="nav"><span><a href="evolutionary-strategies.html">← Day 1: Evolutionary Strategies &amp; Genetic Algorithms</a></span><span><a href="../index.html">All concepts</a></span><span><a href="multi-armed-bandits.html">Day 3: Multi-Armed Bandits: UCB &amp; Thompson Sampling →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

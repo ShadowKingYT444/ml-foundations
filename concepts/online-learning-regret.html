@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Online Learning &amp; Regret Minimization — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>Online Learning &amp; Regret Minimization</h1>
+</header>
+
+<div class="kicker">Day 20 · Oct 20, 2026</div>
+<h1 style="margin-top:6px">Online Learning &amp; Regret Minimization</h1>
+<p class="meta">Nick Littlestone &amp; Manfred Warmuth (weighted majority, 1989–1994); Yoav Freund &amp; Robert Schapire (Hedge, 1997) · <a href="https://en.wikipedia.org/wiki/Online_machine_learning">reference</a> · Learning Theory</p>
+<p><span class="badge rel3">relevant</span></p>
+<p><span class="badge">modern adaptation: sequential harness revision with guarantees</span></p>
+<div class="card"><h2>One line</h2>
+<p>Online learning studies learners that see data one round at a time and must perform well <em>as they go</em> — measured by <strong>regret</strong>: how much worse they did than the best fixed strategy in hindsight.</p>
+<h2>The problem</h2>
+<p>Classical learning assumes you get a dataset, train, then deploy. But many systems face a stream: a spam filter sees emails one by one, a portfolio allocator rebalances daily, and there&#x27;s no &quot;training phase&quot; — every round counts. Worse, the data may be adversarial: assume nothing about the future, and still guarantee you won&#x27;t do much worse than the best single strategy you <em>could</em> have committed to. Regret makes this precise. Over T rounds, if your algorithm accumulates total loss L_alg and the best fixed expert in hindsight accumulates L_best, your <strong>regret</strong> is L_alg − L_best. An algorithm is <em>no-regret</em> if regret grows sublinearly in T — i.e. your per-round disadvantage versus the best expert vanishes as T grows.</p>
+<h2>How it works</h2>
+<p>The canonical algorithm is <strong>Hedge</strong> (a.k.a. exponential weights / multiplicative weights). You maintain a weight wᵢ for each of N experts (candidate strategies). Each round: play the weighted mixture of experts, observe losses ℓᵢ, and update weights multiplicatively:</p>
+<p>    wᵢ ← wᵢ · exp(−η · ℓᵢ)</p>
+<p>Experts that keep losing get exponentially downweighted; η controls how aggressively you shift. The guarantee: with η tuned to √(log N / T), total regret is O(√(T log N)) — sublinear, so per-round regret → 0, <em>with no assumptions about the loss sequence at all</em>, even adversarial ones. The log N dependence is the magic: you can compete with exponentially many experts at the cost of only logarithmic extra regret.</p>
+<h2>Key results</h2>
+<ul>
+<li><strong>Littlestone &amp; Warmuth (1989–1994):</strong> the weighted majority algorithm; the first clean mistake-bound and regret analyses.</li>
+<li><strong>Freund &amp; Schapire (1997):</strong> Hedge and the decision-theoretic framework — regret O(√(T log N)).</li>
+<li><strong>Auer et al. (2002):</strong> EXP3 — no-regret learning with bandit feedback, the foundation of adversarial bandits.</li>
+</ul>
+<h2>How it maps to modern harness work</h2>
+<p>Iterative self-improvement is an online learning problem wearing different clothes: each &quot;round&quot; is a harness revision, each &quot;expert&quot; is a candidate harness design (or a mutation operator), and the &quot;loss&quot; is the harness&#x27;s measured error on that round&#x27;s tasks. The regret framing asks the question nobody in harness land asks: <em>is my revision process doing almost as well as the best fixed harness I could have picked in hindsight?</em> If your search has linear regret — it keeps proposing bad revisions forever — no amount of compute saves you. Hedge suggests a concrete design: keep a population of harness variants with weights, sample revisions proportional to weight, and downweight variants exponentially by their measured loss. That&#x27;s a principled alternative to the greedy keep-or-reject loops (SelfSearch, VACE) that dominate today: greedy search has no regret guarantees and can get stuck; exponential weights provably can&#x27;t do much worse than the best variant in the pool. The bandit variant (EXP3) is the honest model, since you only ever evaluate the harness you actually tried.</p>
+<h2>Limits and open questions</h2>
+<p>The guarantees need a <em>fixed</em> expert set and bounded losses — but harness revision <em>invents</em> new experts (new components, new tools) every round, which breaks the standard analysis; the &quot;sleeping experts&quot; extensions only partly cover this. Losses in harness eval are also noisy and expensive, and regret bounds assume you observe the loss every round — with LLM-eval noise, you&#x27;d need the high-probability versions of these bounds, which are looser. The deepest gap: regret compares you to the best <em>fixed</em> expert in hindsight, but self-improvement&#x27;s whole point is that the best strategy <em>changes</em> as the harness evolves — the right comparator is a moving target, and the theory for that (&quot;dynamic regret&quot;) is much less developed. Still, even as an aspiration, no-regret is a sharper design goal than &quot;the number went up this round.&quot;</p></div>
+<div class="nav"><span><a href="curriculum-learning.html">← Day 19: Curriculum Learning</a></span><span><a href="../index.html">All concepts</a></span><span><a href="self-play.html">Day 21: Self-Play →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

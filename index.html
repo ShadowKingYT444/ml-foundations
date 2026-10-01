@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ML Foundations — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="index.html" style="color:inherit">ML Foundations</a></div>
+<h1>ML Foundations</h1>
+</header>
+
+<p>Foundational ideas from statistics and machine learning — the roots that modern
+agent-harness work keeps rediscovering. TextGrad is textual backprop. RRSI is recursion
+with a fixed-point flavor. PluginRSI is evolution over modules. VACE is EM alternation.
+Each deep-dive explains the original idea from first principles, then shows exactly
+which modern technique is its descendant and what got adapted along the way.</p>
+
+<div class="card today">
+<div class="kicker">Start here — Day 1 · Oct 01, 2026</div>
+<h3 style="margin:8px 0"><a href="concepts/evolutionary-strategies.html">Evolutionary Strategies &amp; Genetic Algorithms</a></h3>
+<p class="meta">Holland 1975; Rechenberg &amp; Schwefel 1970s · Search</p>
+<p><span class="badge rel5">core idea</span></p>
+</div>
+<h2>Reading schedule</h2>
+<table class="sched"><tr><th>Day</th><th>Date</th><th>Concept</th><th>Relevance</th></tr>
+<tr class=""><td><strong>Day 1</strong></td><td>Thu Oct 01</td><td><a href="concepts/evolutionary-strategies.html">Evolutionary Strategies &amp; Genetic Algorithms</a></td><td><span class="badge rel5">core idea</span></td></tr><tr class=""><td><strong>Day 2</strong></td><td>Fri Oct 02</td><td><a href="concepts/gradient-descent.html">Gradient Descent &amp; Backpropagation</a></td><td><span class="badge rel5">core idea</span></td></tr><tr class=""><td><strong>Day 3</strong></td><td>Sat Oct 03</td><td><a href="concepts/multi-armed-bandits.html">Multi-Armed Bandits: UCB &amp; Thompson Sampling</a></td><td><span class="badge rel5">core idea</span></td></tr><tr class=""><td><strong>Day 4</strong></td><td>Sun Oct 04</td><td><a href="concepts/credit-assignment.html">The Credit Assignment Problem</a></td><td><span class="badge rel5">core idea</span></td></tr><tr class=""><td><strong>Day 5</strong></td><td>Mon Oct 05</td><td><a href="concepts/actor-critic.html">Actor-Critic Methods</a></td><td><span class="badge rel4">highly relevant</span></td></tr><tr class=""><td><strong>Day 6</strong></td><td>Tue Oct 06</td><td><a href="concepts/bayesian-optimization.html">Bayesian Optimization</a></td><td><span class="badge rel4">highly relevant</span></td></tr><tr class=""><td><strong>Day 7</strong></td><td>Wed Oct 07</td><td><a href="concepts/boosting.html">Boosting (AdaBoost / Gradient Boosting)</a></td><td><span class="badge rel4">highly relevant</span></td></tr><tr class=""><td><strong>Day 8</strong></td><td>Thu Oct 08</td><td><a href="concepts/expectation-maximization.html">Expectation-Maximization</a></td><td><span class="badge rel4">highly relevant</span></td></tr><tr class=""><td><strong>Day 9</strong></td><td>Fri Oct 09</td><td><a href="concepts/knowledge-distillation.html">Knowledge Distillation</a></td><td><span class="badge rel4">highly relevant</span></td></tr><tr class=""><td><strong>Day 10</strong></td><td>Sat Oct 10</td><td><a href="concepts/meta-learning.html">Meta-Learning (MAML)</a></td><td><span class="badge rel4">highly relevant</span></td></tr><tr class=""><td><strong>Day 11</strong></td><td>Sun Oct 11</td><td><a href="concepts/monte-carlo-tree-search.html">Monte Carlo Tree Search</a></td><td><span class="badge rel4">highly relevant</span></td></tr><tr class=""><td><strong>Day 12</strong></td><td>Mon Oct 12</td><td><a href="concepts/multi-objective-optimization.html">Multi-Objective Optimization &amp; Pareto Fronts</a></td><td><span class="badge rel4">highly relevant</span></td></tr><tr class=""><td><strong>Day 13</strong></td><td>Tue Oct 13</td><td><a href="concepts/pac-learning.html">PAC Learning &amp; Generalization Bounds</a></td><td><span class="badge rel4">highly relevant</span></td></tr><tr class=""><td><strong>Day 14</strong></td><td>Wed Oct 14</td><td><a href="concepts/policy-gradient.html">Policy Gradients (REINFORCE)</a></td><td><span class="badge rel4">highly relevant</span></td></tr><tr class=""><td><strong>Day 15</strong></td><td>Thu Oct 15</td><td><a href="concepts/population-based-training.html">Population-Based Training</a></td><td><span class="badge rel4">highly relevant</span></td></tr><tr class=""><td><strong>Day 16</strong></td><td>Fri Oct 16</td><td><a href="concepts/successive-halving.html">Successive Halving &amp; Hyperband</a></td><td><span class="badge rel4">highly relevant</span></td></tr><tr class=""><td><strong>Day 17</strong></td><td>Sat Oct 17</td><td><a href="concepts/bias-variance-tradeoff.html">The Bias-Variance Tradeoff</a></td><td><span class="badge rel4">highly relevant</span></td></tr><tr class=""><td><strong>Day 18</strong></td><td>Sun Oct 18</td><td><a href="concepts/causal-inference.html">Causal Inference &amp; Counterfactuals</a></td><td><span class="badge rel3">relevant</span></td></tr><tr class=""><td><strong>Day 19</strong></td><td>Mon Oct 19</td><td><a href="concepts/curriculum-learning.html">Curriculum Learning</a></td><td><span class="badge rel3">relevant</span></td></tr><tr class=""><td><strong>Day 20</strong></td><td>Tue Oct 20</td><td><a href="concepts/online-learning-regret.html">Online Learning &amp; Regret Minimization</a></td><td><span class="badge rel3">relevant</span></td></tr><tr class=""><td><strong>Day 21</strong></td><td>Wed Oct 21</td><td><a href="concepts/self-play.html">Self-Play</a></td><td><span class="badge rel3">relevant</span></td></tr><tr class=""><td><strong>Day 22</strong></td><td>Thu Oct 22</td><td><a href="concepts/simulated-annealing.html">Simulated Annealing</a></td><td><span class="badge rel3">relevant</span></td></tr><tr class=""><td><strong>Day 23</strong></td><td>Fri Oct 23</td><td><a href="concepts/cross-entropy-method.html">The Cross-Entropy Method</a></td><td><span class="badge rel3">relevant</span></td></tr><tr class=""><td><strong>Day 24</strong></td><td>Sat Oct 24</td><td><a href="concepts/variational-inference.html">Variational Inference</a></td><td><span class="badge rel2">context</span></td></tr>
+</table>
+<h2>Browse all concepts</h2>
+<div class="grid"><div class="card"><h4><a href="concepts/evolutionary-strategies.html">Evolutionary Strategies &amp; Genetic Algorithms</a></h4><p class="meta">Day 1 · Search</p><p><span class="badge rel5">core idea</span></p></div>
+<div class="card"><h4><a href="concepts/gradient-descent.html">Gradient Descent &amp; Backpropagation</a></h4><p class="meta">Day 2 · Optimization</p><p><span class="badge rel5">core idea</span></p></div>
+<div class="card"><h4><a href="concepts/multi-armed-bandits.html">Multi-Armed Bandits: UCB &amp; Thompson Sampling</a></h4><p class="meta">Day 3 · Reinforcement Learning</p><p><span class="badge rel5">core idea</span></p></div>
+<div class="card"><h4><a href="concepts/credit-assignment.html">The Credit Assignment Problem</a></h4><p class="meta">Day 4 · Reinforcement Learning</p><p><span class="badge rel5">core idea</span></p></div>
+<div class="card"><h4><a href="concepts/actor-critic.html">Actor-Critic Methods</a></h4><p class="meta">Day 5 · Reinforcement Learning</p><p><span class="badge rel4">highly relevant</span></p></div>
+<div class="card"><h4><a href="concepts/bayesian-optimization.html">Bayesian Optimization</a></h4><p class="meta">Day 6 · Optimization</p><p><span class="badge rel4">highly relevant</span></p></div>
+<div class="card"><h4><a href="concepts/boosting.html">Boosting (AdaBoost / Gradient Boosting)</a></h4><p class="meta">Day 7 · Learning Theory</p><p><span class="badge rel4">highly relevant</span></p></div>
+<div class="card"><h4><a href="concepts/expectation-maximization.html">Expectation-Maximization</a></h4><p class="meta">Day 8 · Statistics</p><p><span class="badge rel4">highly relevant</span></p></div>
+<div class="card"><h4><a href="concepts/knowledge-distillation.html">Knowledge Distillation</a></h4><p class="meta">Day 9 · Statistics</p><p><span class="badge rel4">highly relevant</span></p></div>
+<div class="card"><h4><a href="concepts/meta-learning.html">Meta-Learning (MAML)</a></h4><p class="meta">Day 10 · Optimization</p><p><span class="badge rel4">highly relevant</span></p></div>
+<div class="card"><h4><a href="concepts/monte-carlo-tree-search.html">Monte Carlo Tree Search</a></h4><p class="meta">Day 11 · Search</p><p><span class="badge rel4">highly relevant</span></p></div>
+<div class="card"><h4><a href="concepts/multi-objective-optimization.html">Multi-Objective Optimization &amp; Pareto Fronts</a></h4><p class="meta">Day 12 · Optimization</p><p><span class="badge rel4">highly relevant</span></p></div>
+<div class="card"><h4><a href="concepts/pac-learning.html">PAC Learning &amp; Generalization Bounds</a></h4><p class="meta">Day 13 · Learning Theory</p><p><span class="badge rel4">highly relevant</span></p></div>
+<div class="card"><h4><a href="concepts/policy-gradient.html">Policy Gradients (REINFORCE)</a></h4><p class="meta">Day 14 · Reinforcement Learning</p><p><span class="badge rel4">highly relevant</span></p></div>
+<div class="card"><h4><a href="concepts/population-based-training.html">Population-Based Training</a></h4><p class="meta">Day 15 · Optimization</p><p><span class="badge rel4">highly relevant</span></p></div>
+<div class="card"><h4><a href="concepts/successive-halving.html">Successive Halving &amp; Hyperband</a></h4><p class="meta">Day 16 · Search</p><p><span class="badge rel4">highly relevant</span></p></div>
+<div class="card"><h4><a href="concepts/bias-variance-tradeoff.html">The Bias-Variance Tradeoff</a></h4><p class="meta">Day 17 · Statistics</p><p><span class="badge rel4">highly relevant</span></p></div>
+<div class="card"><h4><a href="concepts/causal-inference.html">Causal Inference &amp; Counterfactuals</a></h4><p class="meta">Day 18 · Statistics</p><p><span class="badge rel3">relevant</span></p></div>
+<div class="card"><h4><a href="concepts/curriculum-learning.html">Curriculum Learning</a></h4><p class="meta">Day 19 · Learning Theory</p><p><span class="badge rel3">relevant</span></p></div>
+<div class="card"><h4><a href="concepts/online-learning-regret.html">Online Learning &amp; Regret Minimization</a></h4><p class="meta">Day 20 · Learning Theory</p><p><span class="badge rel3">relevant</span></p></div>
+<div class="card"><h4><a href="concepts/self-play.html">Self-Play</a></h4><p class="meta">Day 21 · Reinforcement Learning</p><p><span class="badge rel3">relevant</span></p></div>
+<div class="card"><h4><a href="concepts/simulated-annealing.html">Simulated Annealing</a></h4><p class="meta">Day 22 · Optimization</p><p><span class="badge rel3">relevant</span></p></div>
+<div class="card"><h4><a href="concepts/cross-entropy-method.html">The Cross-Entropy Method</a></h4><p class="meta">Day 23 · Optimization</p><p><span class="badge rel3">relevant</span></p></div>
+<div class="card"><h4><a href="concepts/variational-inference.html">Variational Inference</a></h4><p class="meta">Day 24 · Optimization</p><p><span class="badge rel2">context</span></p></div></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

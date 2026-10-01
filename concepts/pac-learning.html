@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PAC Learning &amp; Generalization Bounds — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>PAC Learning &amp; Generalization Bounds</h1>
+</header>
+
+<div class="kicker">Day 13 · Oct 13, 2026</div>
+<h1 style="margin-top:6px">PAC Learning &amp; Generalization Bounds</h1>
+<p class="meta">Leslie Valiant, 1984 (&#x27;A theory of the learnable&#x27;) · <a href="https://en.wikipedia.org/wiki/Probably_approximately_correct_learning">reference</a> · Learning Theory</p>
+<p><span class="badge rel4">highly relevant</span></p>
+<p><span class="badge">modern adaptation: Harness Evolution as Learning (theory)</span></p>
+<div class="card"><h2>One line</h2>
+<p>PAC learning gives a mathematical framework for asking: <em>how many training examples do I need before a learned hypothesis is, with high probability, approximately correct?</em></p>
+<h2>The problem</h2>
+<p>Before Valiant, learning was a zoo of algorithms with no common way to say what was <em>learnable</em>. A learner could fit training data perfectly and still fail in the real world, and there was no rigorous language for separating &quot;the data was insufficient&quot; from &quot;the algorithm is broken&quot; from &quot;the hypothesis class can&#x27;t express the truth.&quot; PAC learning made these distinctions quantitative: it defines learnability as the existence of an algorithm that, given enough samples, outputs a hypothesis that is probably (probability ≥ 1 − δ) approximately correct (error ≤ ε).</p>
+<h2>How it works</h2>
+<p>The framework has four ingredients:</p>
+<ul>
+<li>A <strong>hypothesis class</strong> H (e.g. linear classifiers, a fixed set of harness designs).</li>
+<li>An unknown target concept and an unknown data distribution D.</li>
+<li>An algorithm that receives m i.i.d. samples from D.</li>
+<li>Two knobs: <strong>accuracy</strong> ε (how much error we tolerate) and <strong>confidence</strong> δ (how much risk of a bad sample we tolerate).</li>
+</ul>
+<p>A class H is <em>PAC-learnable</em> if some algorithm, for every ε, δ, finds h ∈ H with true error ≤ ε with probability ≥ 1 − δ, using a number of samples m that grows polynomially in 1/ε and 1/δ.</p>
+<p>The core bound, for a finite hypothesis class H and a <em>consistent</em> learner (one that fits all training data): with probability ≥ 1 − δ,</p>
+<p>    true error(h) ≤ (log|H| + log(1/δ)) / m</p>
+<p>In words: generalization error shrinks with more data (1/m) but grows with the log of the hypothesis class size — a bigger search space demands more samples. For infinite classes, the right measure of capacity is the <strong>VC dimension</strong> (Vapnik and Chervonenkis, 1971), and the agnostic bound replaces log|H| with VC(H), paying a 1/ε² rate instead of 1/ε.</p>
+<h2>Key results</h2>
+<ul>
+<li><strong>Valiant (1984):</strong> the PAC model itself; showed that simple classes (conjunctions, k-CNF, decision lists) are efficiently learnable.</li>
+<li><strong>Vapnik–Chervonenkis (1971):</strong> VC dimension characterizes uniform convergence — finite VC dimension is necessary and sufficient for PAC learnability.</li>
+<li><strong>Occam bounds (Blumer et al., 1987):</strong> the finite-class bound above, formalizing &quot;compression implies generalization.&quot;</li>
+</ul>
+<h2>How it maps to modern harness work</h2>
+<p>The 2026 paper <em>Harness Evolution as Learning</em> explicitly imports this vocabulary: it decomposes harness-evolution error into <strong>approximation error</strong> (the best harness in the fixed design class can&#x27;t express the ideal), <strong>generalization error</strong> (the evolved harness overfits the development tasks), and <strong>optimization error</strong> (the search never found the good harness). The PAC mapping is direct: the &quot;hypothesis class&quot; is the set of harness structures the search can reach, the &quot;samples&quot; are the dev tasks used to select harnesses, and ε/δ are the performance-tolerance and confidence you want on unseen tasks. This immediately suggests questions no one in harness land asks rigorously: given a search space of size ~2^n harness variants, how many held-out tasks do you need before your winning harness is probably approximately good? If your dev set has 50 tasks and your harness search space is enormous, PAC says your &quot;generalization&quot; claim is vacuous — which is exactly the regime most recursive self-improvement work lives in today.</p>
+<h2>Limits and open questions</h2>
+<p>PAC assumes a fixed hypothesis class and a fixed distribution, but harness evolution <em>changes</em> the class (new tools, new decompositions appear mid-search), breaking the standard analysis. Worse, real agent tasks are adversarial and non-stationary, not i.i.d. draws from D. An honest PAC-style bound for evolved harnesses would need to handle expanding hypothesis classes and distribution shift — the paper gestures at this but the full theory is unwritten. I&#x27;m also not confident any published harness benchmark has enough held-out tasks to make the bounds nontrivial.</p></div>
+<div class="nav"><span><a href="multi-objective-optimization.html">← Day 12: Multi-Objective Optimization &amp; Pareto Fronts</a></span><span><a href="../index.html">All concepts</a></span><span><a href="policy-gradient.html">Day 14: Policy Gradients (REINFORCE) →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

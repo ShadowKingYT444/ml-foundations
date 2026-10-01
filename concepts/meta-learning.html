@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meta-Learning (MAML) — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>Meta-Learning (MAML)</h1>
+</header>
+
+<div class="kicker">Day 10 · Oct 10, 2026</div>
+<h1 style="margin-top:6px">Meta-Learning (MAML)</h1>
+<p class="meta">Finn, Abbeel &amp; Levine, ICML 2017 · <a href="https://en.wikipedia.org/wiki/Meta_learning_(computer_science)">reference</a> · Optimization</p>
+<p><span class="badge rel4">highly relevant</span></p>
+<p><span class="badge">modern adaptation: Learning Meta-Skills for Agent Harness Design</span></p>
+<div class="card"><h2>One line</h2>
+<p>MAML learns an <em>initialization</em> of a model&#x27;s parameters such that a few gradient steps on a new task produce good performance — it optimizes for fast adaptability rather than for any single task.</p>
+<h2>The problem</h2>
+<p>Standard training optimizes parameters for one fixed task distribution; give the model a genuinely new task and it needs massive data to adapt. Humans do the opposite: we learn <em>how to learn</em> new skills from a handful of examples. The question was how to make &quot;learning to learn&quot; a concrete optimization problem: can you train parameters so that the <em>gradient steps themselves</em> become an effective few-shot learner?</p>
+<h2>How it works</h2>
+<p>MAML has an <strong>inner loop</strong> and an <strong>outer loop</strong>. Given a task <code>Ti</code> with loss <code>LTi</code>, the inner loop takes one (or a few) gradient steps from shared initialization <code>θ</code>:</p>
+<p><code>θi&#x27; = θ − α ∇θ LTi(fθ)</code></p>
+<p>The outer loop then asks: how good is the <em>adapted</em> model? It minimizes the post-adaptation loss summed over tasks:</p>
+<p><code>min_θ Σ_Ti LTi(f_{θi&#x27;})</code></p>
+<p>The meta-gradient flows <em>through</em> the inner update (a gradient of a gradient), which is expensive; first-order approximations like FOMAML and <strong>Reptile</strong> (Nichol, Achiam &amp; Schulman, 2018) drop the second-order terms and work surprisingly well. Intuition: <code>θ</code> is positioned at a point in parameter space from which every task&#x27;s optimum is a short walk away — a &quot;consensus initialization&quot; that is maximally <em>close</em> to many task solutions at once. Finn et al. showed this simple scheme achieving landmark few-shot results on Omniglot and Mini-ImageNet classification and on few-shot reinforcement learning, competitive with far more elaborate architectures.</p>
+<h2>Key results</h2>
+<p>The ICML 2017 paper demonstrated that a single meta-learned initialization could adapt to new image-classification tasks and new RL environments with a handful of gradient steps, matching or beating specialized meta-learning architectures of the time. Follow-ups showed the idea was <em>model-agnostic</em> (it applies to any gradient-trained model, hence the name) and that even first-order approximations retain most of the benefit — the structure of the two-loop optimization mattered more than exact meta-gradients.</p>
+<h2>How it maps to modern harness work</h2>
+<p>The <strong>meta-skills</strong> paper (arXiv 2609.38143) is MAML with the parameter vector replaced by <em>harness-building knowledge</em>. The <strong>inner loop</strong> is per-task adaptation: the Builder assembles a fresh task-specific harness for the Target using the current meta-skills, then observes execution feedback — the analog of taking gradient steps on one task. The <strong>outer loop</strong> is meta-skill learning: the Builder updates its reusable <em>when / what / how-to-use</em> skills across many tasks, exactly like MAML updating <code>θ</code> to minimize post-adaptation loss. What changed: the &quot;parameters&quot; are natural-language procedural knowledge rather than weights, and the &quot;gradient step&quot; is an LLM reflecting on feedback rather than backprop. But the structural insight transfers wholesale — the paper&#x27;s headline finding (a +12.02pp Builder-enactment gap: knowledge helps most when compiled into executable support, not delivered as advice) is the MAML lesson in harness form: meta-learning works when the outer loop produces something the inner loop can <em>act on in a few steps</em>, not a description of the solution.</p>
+<h2>Limits and open questions</h2>
+<p>MAML assumes tasks come from a coherent distribution; when tasks are wildly heterogeneous, no single initialization is close to all optima, and meta-training can produce an initialization that is mediocre everywhere. The harness analog: meta-skills learned on coding tasks may actively hurt on embodied tasks. Also, MAML&#x27;s inner loop is a <em>fixed</em> few gradient steps — but an LLM&#x27;s &quot;inner adaptation&quot; (prompting, editing) has no fixed step budget or convergence guarantee. Open questions: what is the right <em>unit</em> of a meta-skill so it transfers without negative interference; how to detect when the task distribution has shifted enough that meta-skills need re-learning; and whether the outer loop can itself be automated (meta-meta-learning) rather than hand-scheduled.</p></div>
+<div class="nav"><span><a href="knowledge-distillation.html">← Day 9: Knowledge Distillation</a></span><span><a href="../index.html">All concepts</a></span><span><a href="monte-carlo-tree-search.html">Day 11: Monte Carlo Tree Search →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

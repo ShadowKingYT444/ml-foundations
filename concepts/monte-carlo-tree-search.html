@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monte Carlo Tree Search — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>Monte Carlo Tree Search</h1>
+</header>
+
+<div class="kicker">Day 11 · Oct 11, 2026</div>
+<h1 style="margin-top:6px">Monte Carlo Tree Search</h1>
+<p class="meta">Rémi Coulom (2006); UCT by Kocsis &amp; Szepesvári (2006) · <a href="https://en.wikipedia.org/wiki/Monte_Carlo_tree_search">reference</a> · Search</p>
+<p><span class="badge rel4">highly relevant</span></p>
+<p><span class="badge">modern adaptation: search over harness revision trajectories</span></p>
+<div class="card"><h2>One line</h2>
+<p>MCTS grows a search tree by repeatedly selecting promising branches with an exploration bonus, expanding them, estimating their value with random rollouts, and backpropagating the results.</p>
+<h2>The problem</h2>
+<p>Classical game search (minimax with heuristics) collapsed on Go: the branching factor is ~250 and no reliable evaluation function existed, so exhaustive or shallow heuristic search was hopeless. The question was how to allocate a fixed simulation budget across a huge tree so that effort concentrates where uncertainty is highest — a problem identical to searching the space of possible harness edits, where each candidate revision is expensive to evaluate.</p>
+<h2>How it works</h2>
+<p>Each iteration runs four phases. <strong>Selection</strong>: walk down from the root, at each node choosing the child that maximizes the UCT score <code>x̄_j + C_p·√(2·ln(n) / n_j)</code>, where <code>x̄_j</code> is the child&#x27;s mean reward, <code>n_j</code> its visit count, <code>n</code> the parent&#x27;s visit count, and <code>C_p</code> an exploration constant. <strong>Expansion</strong>: add one or more child nodes for an unexplored move. <strong>Simulation</strong>: play a rollout (often random, sometimes guided) from the new node to a terminal state and observe the reward. <strong>Backpropagation</strong>: update visit counts and mean rewards along the path back to the root. The UCT rule is imported from multi-armed bandits (UCB1, Auer et al. 2002): the first term exploits, the second explores rarely-visited children, and the balance provably concentrates visits on the best moves.</p>
+<h2>Key results</h2>
+<p>Kocsis &amp; Szepesvári (2006) showed UCT converges to optimal action selection with high probability. The landmark win came a decade later: AlphaGo (Silver et al., <em>Nature</em>, 2016) fused MCTS with deep policy and value networks and defeated Lee Sedol — the first superhuman Go program, ending a problem the field had considered decades away. The lesson was architectural: search plus learned priors beats either alone.</p>
+<h2>How it maps to modern harness work</h2>
+<p>Harness optimizers that explore sequences of edits — GEPA-style proposal loops, SelfSearch&#x27;s generational lineages — are doing tree search over <em>program space</em>: nodes are harness versions, edges are edits. The <strong>simulation/rollout</strong> analog is evaluating a candidate harness on a task batch; the observed reward (pass rate minus inference cost) plays the role of the playout score, and backpropagation is the credit flowing back to the edit decisions that produced it. UCT&#x27;s selection rule is the principled answer to the budget question every harness optimizer faces: how much effort goes to refining a promising harness versus trying a structurally different one. SelfSearch&#x27;s parallel lineages are essentially parallel tree descents without explicit UCT bookkeeping. The modern twist: classical MCTS uses random rollouts, but harness search replaces them with a <em>learned rollout policy</em> — an LLM proposing edits — exactly mirroring AlphaGo&#x27;s move from random playouts to a policy network.</p>
+<h2>Limits and open questions</h2>
+<p>MCTS needs many simulations to converge, and each harness &quot;simulation&quot; costs real inference dollars, not CPU cycles — naive UCT with random edits burns budget on nonsense. The branching factor is effectively infinite (any edit is legal), so without a strong proposal prior the tree never concentrates. Rewards are also noisy and task-dependent, violating the stationary-reward assumption behind UCB theory. Open question: what is the right depth-versus-breadth budget split when a single rollout costs dollars? Nobody has a principled answer yet; current optimizers use fixed heuristics (a few lineages, a few generations) rather than anything like an exploration bonus.</p></div>
+<div class="nav"><span><a href="meta-learning.html">← Day 10: Meta-Learning (MAML)</a></span><span><a href="../index.html">All concepts</a></span><span><a href="multi-objective-optimization.html">Day 12: Multi-Objective Optimization &amp; Pareto Fronts →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

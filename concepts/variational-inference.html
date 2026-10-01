@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variational Inference — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>Variational Inference</h1>
+</header>
+
+<div class="kicker">Day 24 · Oct 24, 2026</div>
+<h1 style="margin-top:6px">Variational Inference</h1>
+<p class="meta">Michael Jordan and colleagues (Ghahramani, Jaakkola, Saul), late 1990s · <a href="https://en.wikipedia.org/wiki/Variational_Bayesian_methods">reference</a> · Optimization</p>
+<p><span class="badge rel2">context</span></p>
+<p><span class="badge">modern adaptation: surrogate objectives for harness search</span></p>
+<div class="card"><h2>One line</h2>
+<p>When the exact quantity you want is intractable to compute, variational inference optimizes a tractable <em>lower bound</em> on it instead — and maximizing the bound pushes up the real thing.</p>
+<h2>The problem</h2>
+<p>In Bayesian models you want the posterior p(z | x) — the distribution over hidden causes given observations. Bayes&#x27; rule gives p(z | x) = p(x, z) / p(x), but the denominator p(x) = ∫ p(x, z) dz is an integral over all hidden configurations, intractable for any interesting model. Exact inference was the bottleneck that kept Bayesian methods toy-sized through the 1980s. Sampling (MCMC) was the alternative, but it was slow and hard to diagnose.</p>
+<h2>How it works</h2>
+<p>Instead of computing the true posterior, pick a tractable family of distributions q(z; φ) and find the member <em>closest</em> to the true posterior by minimizing KL(q || p(·|x)). The clever part: this minimization is equivalent to maximizing the <strong>ELBO</strong> (evidence lower bound),</p>
+<p>    ELBO(φ) = E_q[log p(x, z)] − E_q[log q(z; φ)]</p>
+<p>because log p(x) = ELBO + KL(q || p(·|x)), and log p(x) doesn&#x27;t depend on φ. So maximizing the ELBO simultaneously (a) tightens the lower bound on the model evidence and (b) drives q toward the true posterior. The intractable integral is replaced by expectations under q, which you can approximate with samples. The price: the bound has a <em>gap</em> — if your q family can&#x27;t express the true posterior (say you use a Gaussian for a multimodal posterior), you converge to the best approximation within the family, not the truth. Modern variational autoencoders are this idea with q parameterized by a neural network.</p>
+<h2>Key results</h2>
+<ul>
+<li><strong>Jordan, Ghahramani, Jaakkola &amp; Saul (1999):</strong> the tutorial that unified variational methods for graphical models and made them mainstream.</li>
+<li><strong>Peterson &amp; Anderson (1987):</strong> earlier mean-field work on Boltzmann machines — the conceptual seed.</li>
+<li><strong>Kingma &amp; Welling (2013):</strong> the variational autoencoder — VI with amortized, neural-network q, trained by backprop through the ELBO.</li>
+</ul>
+<h2>How it maps to modern harness work</h2>
+<p>Harness search has the same structural problem VI solves: the <em>true objective</em> — expected performance of a harness on the real task distribution — is intractable (you&#x27;d need to run the harness on infinitely many tasks with human grading). So the field optimizes a <strong>surrogate</strong>: a small dev set, an LLM judge&#x27;s score, a reward model&#x27;s estimate. That&#x27;s the ELBO move — maximize a tractable stand-in and hope the gap to the truth is small. The VI lens adds two useful warnings. First, the gap matters: just as a restricted q family caps how good your posterior approximation can be, a restricted surrogate (say, an LLM judge that likes verbosity) caps how good your evolved harness can be — you converge to the best harness <em>for the judge</em>, not for reality. Second, VI theory says to <em>monitor the gap</em>: in harness terms, periodically re-evaluate top candidates on the expensive true-ish objective (fresh tasks, human grades) and check whether surrogate rankings still agree. VACE&#x27;s checkpoint-gated validation is a primitive version of exactly this — re-anchoring the surrogate to ground truth at each round.</p>
+<h2>Limits and open questions</h2>
+<p>The analogy is conceptual, not mathematical — nobody has an ELBO-style bound relating &quot;LLM-judge score&quot; to &quot;true harness quality,&quot; and the KL gap has no measurable counterpart when your surrogate isn&#x27;t a distribution. Surrogate optimization in harness land is also <em>adversarial</em> in a way VI isn&#x27;t: an evolving harness can actively exploit the judge (reward hacking), while a posterior can&#x27;t exploit the ELBO. The open question is whether we can build surrogates with <em>certified</em> gaps — e.g. a judge whose disagreement with human grades is itself bounded — which would turn &quot;optimize the surrogate&quot; from a hope into a guarantee. Until then, this idea is a design discipline (name your surrogate, budget gap-checks) rather than a deployable technique.</p></div>
+<div class="nav"><span><a href="cross-entropy-method.html">← Day 23: The Cross-Entropy Method</a></span><span><a href="../index.html">All concepts</a></span><span></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

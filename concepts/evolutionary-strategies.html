@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evolutionary Strategies &amp; Genetic Algorithms — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>Evolutionary Strategies &amp; Genetic Algorithms</h1>
+</header>
+
+<div class="kicker">Day 1 · Oct 01, 2026</div>
+<h1 style="margin-top:6px">Evolutionary Strategies &amp; Genetic Algorithms</h1>
+<p class="meta">Holland 1975; Rechenberg &amp; Schwefel 1970s · <a href="https://en.wikipedia.org/wiki/Genetic_algorithm">reference</a> · Search</p>
+<p><span class="badge rel5">core idea</span></p>
+<p><span class="badge">modern adaptation: PluginRSI / DGM / mixture-of-branches</span></p>
+<div class="card"><h2>One line</h2>
+<p>Keep a <em>population</em> of candidate solutions, let the fittest reproduce with random <em>mutations</em> (and crossover), and repeat — a gradient-free optimizer that works on any representation, from bit strings to neural weights to plugin code.</p>
+<h2>The problem</h2>
+<p>Gradient methods need differentiable objectives; many real problems — combinatorial design, program synthesis, architectures — have no gradient at all. Hill climbing from a single point gets trapped in local optima and can&#x27;t hedge its bets. Holland&#x27;s (1975) <em>Adaptation in Natural and Artificial Systems</em> asked whether the <em>process</em> of natural selection could be formalized as a general search algorithm, and Rechenberg and Schwefel were independently evolving aerodynamic shapes in 1970s Berlin with what became evolution strategies (ES).</p>
+<h2>How it works</h2>
+<p>A genetic algorithm maintains a population of individuals (each a candidate solution, e.g. a bit string). Each generation: (1) <strong>evaluate</strong> fitness for all; (2) <strong>select</strong> parents with probability proportional to fitness — fitness-proportionate (roulette-wheel) selection, or tournament selection in modern practice; (3) <strong>crossover</strong> recombines two parents&#x27; representations; (4) <strong>mutate</strong> perturbs the offspring slightly. The schema theorem (Holland) gives the intuition for why this works: selection exponentially amplifies above-average <em>building blocks</em> (schemas), while mutation and crossover explore new combinations. Evolution strategies drop crossover and work directly on real-valued vectors with adaptive step sizes (the famous 1/5 success rule, then CMA-ES&#x27;s covariance adaptation). The key property: it&#x27;s a <em>population</em> method, so diversity is intrinsic and there&#x27;s no single point of failure.</p>
+<h2>Key results</h2>
+<p>Holland&#x27;s schema theorem (1975) and the building-block hypothesis gave GA its theoretical folklore. CMA-ES (Hansen &amp; Ostermeier, 2001) became the gold standard for black-box continuous optimization. The famous empirical revival: Salimans et al. (2017) showed ES — basically Gaussian perturbations plus fitness-weighted averaging — could train deep RL policies competitively with gradient methods, proving evolution scales to millions of parameters.</p>
+<h2>How it maps to modern harness work</h2>
+<p>Recursive self-improvement systems are evolutionary algorithms where the genome is <em>harness code</em> and the mutator is an LLM. Three modern instantiations:</p>
+<ul>
+<li><strong>PluginRSI</strong>: the <em>unit of selection</em> is the plugin, not the whole harness. A library of ~75 plugins evolves: useful plugins reproduce (get reused/composed), useless ones die out. This is the building-block hypothesis made literal — selection accumulates knowledge in <em>modular</em> units, so the population&#x27;s total knowledge grows even as individual agents come and go.</li>
+<li><strong>DGM (Darwin Gödel Machine)</strong>: the whole agent codebase is the individual; the LLM proposes code edits (mutations), keeps the ones that improve benchmark scores (selection), and archives the lineage. Self-modifying code as an evolutionary process.</li>
+<li><strong>Mixture of self-improving branches</strong>: a <em>population of two</em> harness lineages, each evolving against the data subset it &quot;owns&quot; — speciation by niche, with a router (not crossover) combining them at deploy time.</li>
+</ul>
+<p>What changed versus classical GA: the mutation operator went from random bit flips to an <em>intelligent</em> proposer (the LLM writes directed edits), which is both the superpower (far fewer wasted evaluations) and the failure mode (the mutator&#x27;s biases become the search&#x27;s blind spots).</p>
+<h2>Limits and open questions</h2>
+<p>LLM-guided mutation is not random: it inherits the model&#x27;s priors, so &quot;diversity&quot; must be enforced rather than assumed. Fitness evaluation is noisy and expensive (full rollouts), making selection unreliable — a lucky evaluation can fix a bad mutation in the population. And there&#x27;s no crossover analog worthy of the name: merging two harness lineages&#x27; code is still an unsolved composition problem. Open questions: what is the right unit of selection — plugin, file, whole repo? Can we get the building-block accumulation of PluginRSI without a human fixing the plugin interfaces in advance? And does intelligent mutation converge prematurely in exactly the way random mutation was designed to avoid?</p></div>
+<div class="nav"><span></span><span><a href="../index.html">All concepts</a></span><span><a href="gradient-descent.html">Day 2: Gradient Descent &amp; Backpropagation →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>

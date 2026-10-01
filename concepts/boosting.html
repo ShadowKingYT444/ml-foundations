@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boosting (AdaBoost / Gradient Boosting) — ML Foundations</title>
+<style>
+:root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --fg:#e6edf3; --muted:#8b949e;
+        --accent:#58a6ff; --accent2:#3fb950; --warn:#d29922; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       margin:0; line-height:1.65; }
+a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+.wrap { max-width:860px; margin:0 auto; padding:0 20px 60px; }
+header.site { border-bottom:1px solid var(--border); padding:28px 0 18px; margin-bottom:28px; }
+header.site .brand { font-size:15px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+header.site h1 { margin:8px 0 4px; font-size:30px; }
+header.site p { color:var(--muted); margin:6px 0 0; max-width:640px; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin:16px 0; }
+.card.today { border-color:var(--accent2); }
+.badge { display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:20px;
+         border:1px solid var(--border); color:var(--muted); margin-right:8px; }
+.badge.rel5 { color:#f778ba; border-color:#f778ba55; } .badge.rel4 { color:#ffa657; border-color:#ffa65755; }
+.badge.rel3 { color:var(--accent); border-color:#58a6ff55; } .badge.rel2,.badge.rel1 { color:var(--muted); }
+.meta { color:var(--muted); font-size:14px; }
+h2 { margin-top:34px; font-size:22px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+h3 { font-size:17px; margin-top:26px; color:var(--accent); }
+code { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:13px; }
+pre code { display:block; padding:14px; overflow-x:auto; }
+table.sched { width:100%; border-collapse:collapse; font-size:14px; }
+table.sched th, table.sched td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); }
+table.sched tr.today td { background:#3fb95014; }
+table.sched tr.past td { color:var(--muted); }
+.nav { display:flex; justify-content:space-between; margin-top:34px; padding-top:18px; border-top:1px solid var(--border); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.grid .card { margin:0; padding:14px 16px; } .grid .card h4 { margin:0 0 6px; font-size:15px; }
+.grid .card .meta { font-size:12.5px; }
+footer { margin-top:50px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+.kicker { color:var(--accent2); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+</style></head>
+<body><div class="wrap">
+<header class="site">
+<div class="brand"><a href="../index.html" style="color:inherit">ML Foundations</a></div>
+<h1>Boosting (AdaBoost / Gradient Boosting)</h1>
+</header>
+
+<div class="kicker">Day 7 · Oct 07, 2026</div>
+<h1 style="margin-top:6px">Boosting (AdaBoost / Gradient Boosting)</h1>
+<p class="meta">Freund &amp; Schapire (1997) · <a href="https://en.wikipedia.org/wiki/Boosting_(machine_learning)">reference</a> · Learning Theory</p>
+<p><span class="badge rel4">highly relevant</span></p>
+<p><span class="badge">modern adaptation: component fusion in adaptive decomposition</span></p>
+<div class="card"><h2>One line</h2>
+<p>Build a strong predictor by sequentially training weak learners on reweighted data that emphasizes the current ensemble&#x27;s mistakes, then combining them by weighted vote.</p>
+<h2>The problem</h2>
+<p>It&#x27;s far easier to find many rules that are slightly better than chance than to find one great rule. Schapire (1990) asked whether weak learnability could be converted into strong learnability — and the practical question was how to combine the weak rules without them just echoing each other. The harness analog: it&#x27;s easier to evolve components that each handle one slice of the task space than to evolve one monolithic harness that handles everything.</p>
+<h2>How it works</h2>
+<p>AdaBoost: start with uniform weights <code>D₁(i) = 1/m</code>. At round <code>t</code>, train a weak learner <code>h_t</code> on the weighted data, measure its weighted error <code>ε_t</code>, set its vote weight <code>α_t = ½·ln((1−ε_t)/ε_t)</code>, and reweight: <code>D_{t+1}(i) ∝ D_t(i)·exp(−α_t·y_i·h_t(x_i))</code> — misclassified points get exponentially upweighted, correctly classified ones downweighted. Final classifier: <code>H(x) = sign(Σ_t α_t·h_t(x))</code>. Friedman, Hastie &amp; Tibshirani (2000) showed this is coordinate descent on exponential loss <code>Σ exp(−y·H(x))</code>; Friedman (2001) generalized it to gradient boosting, where each new learner fits the <em>residuals</em> (negative gradient) of the ensemble — the idea XGBoost (Chen &amp; Guestrin, 2016) industrialized for tabular data.</p>
+<h2>Key results</h2>
+<p>Schapire (1990) proved weak learnability implies strong learnability. Freund &amp; Schapire (1997) gave the practical AdaBoost with the training-error bound <code>Π_t 2√(ε_t(1−ε_t))</code>: error drops exponentially fast as long as each weak learner beats chance. The work earned the 2003 Gödel Prize, and gradient boosting dominated tabular ML competitions for two decades. The core theoretical insight: reweighting forces <em>diversity</em> — each new learner must succeed where the ensemble currently fails.</p>
+<h2>How it maps to modern harness work</h2>
+<p>Fusing working harness components is the structural analog of boosting. Each component is a &quot;weak learner&quot; — competent on some subproblem slice, useless elsewhere — and the fused harness is the ensemble. The reweighting mechanism maps to <em>budget allocation</em>: components that fail get more search budget (split and re-evolved), like misclassified points getting upweighted; components that work get fused and their budgets consolidated. The diversity requirement is the crux, and it has a direct empirical echo: the Scaffold paper (2609.34924) warns that fusion/voting only helps with <em>cross-family</em> diversity — a majority of same-family workers failed 23 of 55 tasks, so voting among near-identical agents adds nothing. Boosting theory says the same thing formally: if the weak learners err identically, the exponential-loss bound collapses and the ensemble is no better than its parts.</p>
+<h2>Limits and open questions</h2>
+<p>Boosting overfits noisy labels — late rounds fit noise, not signal — and the harness analog is fusing components around spurious task quirks, producing a fused harness that is brittle outside the training tasks. Worse, boosting theory assumes a <em>fixed</em> weak-learner class while only the data weights change; in adaptive decomposition both the components <em>and</em> the decomposition change, which breaks the clean analysis. The open question is a fusion rule with boosting-style guarantees for <em>evolving</em> components: under what diversity condition does fusing two independently-evolved harness components provably help? No such theorem exists yet, and writing one is a genuine research target — it would be the theoretical backbone of the fuse step in adaptive decomposition.</p></div>
+<div class="nav"><span><a href="bayesian-optimization.html">← Day 6: Bayesian Optimization</a></span><span><a href="../index.html">All concepts</a></span><span><a href="expectation-maximization.html">Day 8: Expectation-Maximization →</a></span></div>
+
+<footer>Study notes on the foundational ideas of statistics and machine learning —
+and the modern work (TextGrad, RRSI, PluginRSI, …) that adapts them. Not affiliated
+with any authors. Source links point to public references.</footer>
+</div></body></html>
